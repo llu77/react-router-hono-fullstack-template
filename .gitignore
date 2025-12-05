@@ -201,3 +201,9 @@ dist
 ### React Router ###
 .react-router/
 /build/
+
+### Database ###
+*.db
+*.db-wal
+*.db-shm
+drizzle/

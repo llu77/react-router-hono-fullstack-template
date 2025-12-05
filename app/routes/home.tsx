@@ -1,17 +1,28 @@
+import { redirect } from "react-router";
 import type { Route } from "./+types/home";
-import { Welcome } from "../welcome/welcome";
+import { getTokenFromCookie, verifyToken } from "~/lib/auth";
 
-export function meta({}: Route.MetaArgs) {
+export function meta() {
   return [
-    { title: "New React Router App" },
-    { name: "description", content: "Welcome to React Router!" },
+    { title: "نظام إدارة الإيرادات" },
+    { name: "description", content: "نظام متكامل لإدارة ومتابعة الإيرادات اليومية" },
   ];
 }
 
-export function loader({ context }: Route.LoaderArgs) {
-  return { message: context.cloudflare.env.VALUE_FROM_CLOUDFLARE };
+export async function loader({ request }: Route.LoaderArgs) {
+  const cookieHeader = request.headers.get("Cookie");
+  const token = getTokenFromCookie(cookieHeader);
+
+  if (token) {
+    const payload = await verifyToken(token);
+    if (payload) {
+      return redirect("/dashboard");
+    }
+  }
+
+  return redirect("/login");
 }
 
-export default function Home({ loaderData }: Route.ComponentProps) {
-  return <Welcome message={loaderData.message} />;
+export default function Home() {
+  return null;
 }
