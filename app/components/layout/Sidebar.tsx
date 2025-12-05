@@ -3,6 +3,7 @@ import { cn } from "~/lib/utils";
 import {
   LayoutDashboard,
   Receipt,
+  Wallet,
   Users,
   Building2,
   BarChart3,
@@ -32,6 +33,11 @@ const menuItems = [
     title: "الإيرادات",
     href: "/dashboard/revenues",
     icon: Receipt,
+  },
+  {
+    title: "المصاريف",
+    href: "/dashboard/expenses",
+    icon: Wallet,
   },
   {
     title: "الموظفين",

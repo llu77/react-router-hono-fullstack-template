@@ -163,6 +163,82 @@ export const employeeRevenuesRelations = relations(employeeRevenues, ({ one }) =
   }),
 }));
 
+// ==================== جداول المصاريف ====================
+
+/**
+ * جدول فئات المصاريف
+ * يحتوي على 15 فئة ثابتة + قابلة للتوسع
+ */
+export const expenseCategories = sqliteTable("expense_categories", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  code: text("code").notNull().unique(),
+  name: text("name").notNull(),
+  icon: text("icon"),
+  color: text("color"),
+  sortOrder: integer("sort_order").default(0),
+  isActive: integer("is_active", { mode: "boolean" }).default(true),
+  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
+});
+
+/**
+ * جدول المصاريف
+ * كل مصروف مرتبط بفرع + مستخدم + فئة
+ */
+export const expenses = sqliteTable("expenses", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+
+  // البيانات الأساسية
+  date: text("date").notNull(), // YYYY-MM-DD
+  categoryId: integer("category_id")
+    .references(() => expenseCategories.id)
+    .notNull(),
+  amount: real("amount").notNull(),
+  paymentType: text("payment_type", { enum: ["cash", "network"] }).notNull(),
+
+  // بيانات إضافية
+  description: text("description"),
+  employeeId: integer("employee_id").references(() => employees.id), // للسلفة فقط
+  receiptNumber: text("receipt_number"),
+
+  // الربط بالفرع والمستخدم
+  branchId: integer("branch_id")
+    .references(() => branches.id)
+    .notNull(),
+  createdBy: integer("created_by")
+    .references(() => users.id)
+    .notNull(),
+
+  // التتبع
+  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
+  updatedAt: text("updated_at"),
+  deletedAt: text("deleted_at"), // Soft delete
+});
+
+// ==================== علاقات المصاريف ====================
+
+export const expenseCategoriesRelations = relations(expenseCategories, ({ many }) => ({
+  expenses: many(expenses),
+}));
+
+export const expensesRelations = relations(expenses, ({ one }) => ({
+  category: one(expenseCategories, {
+    fields: [expenses.categoryId],
+    references: [expenseCategories.id],
+  }),
+  branch: one(branches, {
+    fields: [expenses.branchId],
+    references: [branches.id],
+  }),
+  createdByUser: one(users, {
+    fields: [expenses.createdBy],
+    references: [users.id],
+  }),
+  employee: one(employees, {
+    fields: [expenses.employeeId],
+    references: [employees.id],
+  }),
+}));
+
 // ==================== الأنواع ====================
 
 export type Branch = typeof branches.$inferSelect;
@@ -182,3 +258,9 @@ export type NewDailyRevenue = typeof dailyRevenues.$inferInsert;
 
 export type EmployeeRevenue = typeof employeeRevenues.$inferSelect;
 export type NewEmployeeRevenue = typeof employeeRevenues.$inferInsert;
+
+export type ExpenseCategory = typeof expenseCategories.$inferSelect;
+export type NewExpenseCategory = typeof expenseCategories.$inferInsert;
+
+export type Expense = typeof expenses.$inferSelect;
+export type NewExpense = typeof expenses.$inferInsert;

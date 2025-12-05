@@ -84,6 +84,35 @@ sqlite.exec(`
     created_at TEXT DEFAULT CURRENT_TIMESTAMP
   );
 
+  -- جدول فئات المصاريف
+  CREATE TABLE IF NOT EXISTS expense_categories (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    code TEXT NOT NULL UNIQUE,
+    name TEXT NOT NULL,
+    icon TEXT,
+    color TEXT,
+    sort_order INTEGER DEFAULT 0,
+    is_active INTEGER DEFAULT 1,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+  );
+
+  -- جدول المصاريف
+  CREATE TABLE IF NOT EXISTS expenses (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date TEXT NOT NULL,
+    category_id INTEGER NOT NULL REFERENCES expense_categories(id),
+    amount REAL NOT NULL,
+    payment_type TEXT NOT NULL CHECK(payment_type IN ('cash', 'network')),
+    description TEXT,
+    employee_id INTEGER REFERENCES employees(id),
+    receipt_number TEXT,
+    branch_id INTEGER NOT NULL REFERENCES branches(id),
+    created_by INTEGER NOT NULL REFERENCES users(id),
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT,
+    deleted_at TEXT
+  );
+
   -- إنشاء الفهارس لتحسين الأداء
   CREATE INDEX IF NOT EXISTS idx_users_branch ON users(branch_id);
   CREATE INDEX IF NOT EXISTS idx_employees_branch ON employees(branch_id);
@@ -91,6 +120,12 @@ sqlite.exec(`
   CREATE INDEX IF NOT EXISTS idx_daily_revenues_branch ON daily_revenues(branch_id);
   CREATE INDEX IF NOT EXISTS idx_employee_revenues_daily ON employee_revenues(daily_revenue_id);
   CREATE UNIQUE INDEX IF NOT EXISTS idx_daily_revenues_unique ON daily_revenues(date, branch_id);
+
+  -- فهارس المصاريف
+  CREATE INDEX IF NOT EXISTS idx_expenses_date ON expenses(date);
+  CREATE INDEX IF NOT EXISTS idx_expenses_category ON expenses(category_id);
+  CREATE INDEX IF NOT EXISTS idx_expenses_branch ON expenses(branch_id);
+  CREATE INDEX IF NOT EXISTS idx_expenses_date_branch ON expenses(date, branch_id);
 `);
 
 console.log("✅ تم إنشاء جميع الجداول بنجاح!");

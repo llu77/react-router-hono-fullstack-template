@@ -14,6 +14,7 @@ export default [
   layout("routes/_dashboard.tsx", [
     route("dashboard", "routes/_dashboard._index.tsx", { index: true }),
     route("dashboard/revenues", "routes/_dashboard.revenues.tsx"),
+    route("dashboard/expenses", "routes/_dashboard.expenses.tsx"),
     route("dashboard/employees", "routes/_dashboard.employees.tsx"),
     route("dashboard/branches", "routes/_dashboard.branches.tsx"),
     route("dashboard/reports", "routes/_dashboard.reports.tsx"),
